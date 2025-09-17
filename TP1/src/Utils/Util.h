@@ -27,6 +27,6 @@ ppm_file read_ppm(char *filename);
 void write_ppm(ppm_file image, char *filename);
 
 pam_file read_pam(char *filename);
-void write_pam(pam_file image, char filename);
+void write_pam(pam_file image, char *filename) ;
 
 #endif

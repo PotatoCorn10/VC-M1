@@ -26,7 +26,7 @@ typedef struct {
   bit red;
   bit green;
   bit blue;
-  float alpha;
+  bit alpha;
 } pam_pixel;
 
 // A PPM file, containing a pixel map and its metadata
@@ -44,6 +44,7 @@ typedef struct {
   int rows;
   int cols;
   int maxval;
+  int depth;
   char tupltype[64];
 } pam_file;
 

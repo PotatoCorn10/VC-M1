@@ -300,12 +300,11 @@ void write_ppm(ppm_file image, char *filename) {
   fclose(ofp);
 }
 
+
 pam_file read_pam(char *filename) {
     
   FILE *ifp;
   int firstchar, rows, cols;
-
-  int is_raw;
 
   int i, j;
   pam_file image;
@@ -332,10 +331,15 @@ pam_file read_pam(char *filename) {
     pm_error(" wrong file type ");
   }
 
+  char tupltype[4] = "RGBA";
   /* Reading image dimensions */
   cols = pm_getint(ifp);
   rows = pm_getint(ifp);
   image.maxval = pm_getint(ifp);
+  image.depth = pm_getint(ifp);
+  for (int k=0; k<3;k++){
+    image.tupltype[k] = tupltype[k];
+  }
 
   image.rows = rows;
   image.cols = cols;
@@ -344,15 +348,13 @@ pam_file read_pam(char *filename) {
   image.pammap = (pam_pixel *) malloc (cols * rows * sizeof(pam_pixel));
 
   /* Reading */
-
-    /* Reading */
   for (i = 0; i < rows; i++) {
     for (j = 0; j < cols; j++) {
-      // if is_raw = 1 => read a binary file else reads ascii file 
+      // [r1 g1 b1 a1 r2 g2 b2 a2 .... ]
         image.pammap[i * cols + j].red = pm_getrawbyte(ifp);
         image.pammap[i * cols + j].green = pm_getrawbyte(ifp);
         image.pammap[i * cols + j].blue = pm_getrawbyte(ifp);
-
+        image.pammap[i * cols + j].alpha = pm_getrawbyte(ifp);
     }
   }
   /* Closing input file */
@@ -363,7 +365,6 @@ pam_file read_pam(char *filename) {
 
 void write_pam(pam_file image, char *filename) {
   FILE *ofp;
-  int is_raw, i, j;
 
   /* Opening output file */
   ofp = fopen(filename, "w");
@@ -372,17 +373,20 @@ void write_pam(pam_file image, char *filename) {
     pm_error(" FILE OPEN ERROR");
   }
 
+  fprintf(ofp, "P7\n");
   fprintf(ofp, "%d %d \n", image.cols, image.rows);
   fprintf(ofp, "%d\n", image.maxval);
-  fprintf(ofp, "%s\n", image.tupltype);
+  fprintf(ofp, "%d\n", image.depth);
+  // fprintf(ofp, "%s\n", image.tupltype);
 
-  for (i = 0; i < image.rows; i++)
-    for (j = 0; j < image.cols; j++)
-
+  for (int i = 0; i < image.rows; i++){
+    for (int j = 0; j < image.cols; j++) {
         fprintf(ofp, "%c", image.pammap[i * image.cols + j].red);
         fprintf(ofp, "%c", image.pammap[i * image.cols + j].green);
         fprintf(ofp, "%c", image.pammap[i * image.cols + j].blue);
-
+        fprintf(ofp, "%c", image.pammap[i * image.cols + j].alpha);
+    }
+  }
   /* Closing output file */
   fclose(ofp);
 }
