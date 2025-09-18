@@ -10,4 +10,5 @@ void split_channels(ppm_file image,
 // TODO: convert rgb to grayscale
 void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness);
 
+void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha);
 #endif

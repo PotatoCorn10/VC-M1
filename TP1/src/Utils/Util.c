@@ -331,14 +331,14 @@ pam_file read_pam(char *filename) {
     pm_error(" wrong file type ");
   }
 
-  char tupltype[4] = "RGBA";
   /* Reading image dimensions */
   cols = pm_getint(ifp);
   rows = pm_getint(ifp);
   image.maxval = pm_getint(ifp);
   image.depth = pm_getint(ifp);
-  for (int k=0; k<3;k++){
-    image.tupltype[k] = tupltype[k];
+  for (int k=0; k<4;k++){
+    // RGBA
+    image.tupltype[k] = pm_getint(ifp);
   }
 
   image.rows = rows;

@@ -68,10 +68,9 @@ void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness){
         image_gray->magic_number = '2';
     } else {
         // Binary file 
-        image.magic_number = '5';
+        image_gray->magic_number  = '5';
     }
     
-    image_gray->magic_number = image.magic_number;
     image_gray->cols = image.cols;
     image_gray->rows = image.rows;
     image_gray->maxval = image.maxval;
@@ -95,6 +94,38 @@ void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness){
             // if (gray_value > image.maxval) gray_value = image.maxval;
 
             image_gray->graymap[idx] = (gray) gray_value;
+        }
+    }
+}
+
+void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha) {
+    if (image.magic_number != '3' || image.magic_number != '6'){
+        // perror("WRONG FILE TYPE");
+        //exit(1);
+    }
+    image_pam->magic_number = '7';
+    image_pam->cols = image.cols; int cols = image.cols;
+    image_pam->rows = image.rows; int rows = image.rows;
+    image_pam->maxval = image.maxval;
+    image_pam->depth = 4;
+    char tupltype[4] = "RGBA";
+    for (int k=0; k<3;k++){
+    image_pam->tupltype[k] = tupltype[k];
+  }
+
+    image_pam->pammap = (pam_pixel *) malloc (cols * rows * sizeof(pam_pixel));
+    assert(image_pam->pammap);
+
+    for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++) {
+
+            // converting rgb to grayscale 
+            int index = i * image.cols + j;
+            image_pam->pammap[index].red = image.pixmap[index].red;
+            image_pam->pammap[index].green = image.pixmap[index].green;
+            image_pam->pammap[index].blue = image.pixmap[index].blue;
+            image_pam->pammap[index].alpha = alpha;
+
         }
     }
 }
