@@ -335,11 +335,6 @@ pam_file read_pam(char *filename) {
   cols = pm_getint(ifp);
   rows = pm_getint(ifp);
   image.maxval = pm_getint(ifp);
-  image.depth = pm_getint(ifp);
-  for (int k=0; k<4;k++){
-    // RGBA
-    image.tupltype[k] = pm_getint(ifp);
-  }
 
   image.rows = rows;
   image.cols = cols;
@@ -376,8 +371,6 @@ void write_pam(pam_file image, char *filename) {
   fprintf(ofp, "P7\n");
   fprintf(ofp, "%d %d \n", image.cols, image.rows);
   fprintf(ofp, "%d\n", image.maxval);
-  fprintf(ofp, "%d\n", image.depth);
-  // fprintf(ofp, "%s\n", image.tupltype);
 
   for (int i = 0; i < image.rows; i++){
     for (int j = 0; j < image.cols; j++) {

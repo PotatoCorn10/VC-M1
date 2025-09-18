@@ -107,11 +107,6 @@ void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha) {
     image_pam->cols = image.cols; int cols = image.cols;
     image_pam->rows = image.rows; int rows = image.rows;
     image_pam->maxval = image.maxval;
-    image_pam->depth = 4;
-    char tupltype[4] = "RGBA";
-    for (int k=0; k<3;k++){
-    image_pam->tupltype[k] = tupltype[k];
-  }
 
     image_pam->pammap = (pam_pixel *) malloc (cols * rows * sizeof(pam_pixel));
     assert(image_pam->pammap);
