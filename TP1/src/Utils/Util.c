@@ -369,8 +369,12 @@ void write_pam(pam_file image, char *filename) {
   }
 
   fprintf(ofp, "P7\n");
-  fprintf(ofp, "%d %d \n", image.cols, image.rows);
-  fprintf(ofp, "%d\n", image.maxval);
+  fprintf(ofp, "WIDTH %d\nHEIGHT %d \n", image.cols, image.rows);
+  fprintf(ofp, "DEPTH %d\n", image.depth);
+  fprintf(ofp, "MAXVAL %d\n", image.maxval);
+  fprintf(ofp, "TUPLTYPE RGB_ALPHA\n");
+  fprintf(ofp, "ENDHDR\n");
+
 
   for (int i = 0; i < image.rows; i++){
     for (int j = 0; j < image.cols; j++) {

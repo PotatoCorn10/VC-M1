@@ -45,7 +45,7 @@ typedef struct {
   int cols;
   int maxval;
   int depth;
-  char tupltype[64];
+  // char tupltype[64];
 } pam_file;
 
 

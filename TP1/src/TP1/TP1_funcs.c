@@ -99,14 +99,15 @@ void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness){
 }
 
 void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha) {
-    if (image.magic_number != '3' || image.magic_number != '6'){
-        // perror("WRONG FILE TYPE");
-        //exit(1);
+    if (image.magic_number != '3' && image.magic_number != '6'){
+        perror("WRONG FILE TYPE");
+        exit(1);
     }
     image_pam->magic_number = '7';
     image_pam->cols = image.cols; int cols = image.cols;
     image_pam->rows = image.rows; int rows = image.rows;
     image_pam->maxval = image.maxval;
+    image_pam->depth = 4;
 
     image_pam->pammap = (pam_pixel *) malloc (cols * rows * sizeof(pam_pixel));
     assert(image_pam->pammap);
