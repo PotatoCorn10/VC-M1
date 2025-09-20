@@ -98,10 +98,18 @@ void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness){
     }
 }
 
-void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha) {
+void ppm_to_pam(ppm_file image, pgm_file mask, pam_file *image_pam) {
     if (image.magic_number != '3' && image.magic_number != '6'){
         perror("WRONG FILE TYPE");
         exit(1);
+    }
+    if(mask.magic_number != '2' && mask.magic_number != '5'){
+        perror("WRONG FILE TYPE");
+        exit(1);
+    }
+    if(image.rows != mask.rows || image.cols != mask.cols){
+      perror("IMAGE AND MASK DIMENSION MISSMATCH");
+      exit(1);
     }
     image_pam->magic_number = '7';
     image_pam->cols = image.cols; int cols = image.cols;
@@ -120,8 +128,7 @@ void ppm_to_pam(ppm_file image, pam_file *image_pam, int alpha) {
             image_pam->pammap[index].red = image.pixmap[index].red;
             image_pam->pammap[index].green = image.pixmap[index].green;
             image_pam->pammap[index].blue = image.pixmap[index].blue;
-            image_pam->pammap[index].alpha = alpha;
-
+            image_pam->pammap[index].alpha = mask.graymap[index];
         }
     }
 }
