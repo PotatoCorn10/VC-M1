@@ -3,7 +3,7 @@
 #                                     #
 #######################################
 
-PROG = pgmtopgm ppmtorgb ppmtopgm ppmtopam
+PROG = pgmtopgm ppmtorgb ppmtopgm ppmtopam createmask
 
 all : $(PROG)
 
@@ -17,6 +17,8 @@ pgmtopgm : pgmtopgm.o Utils/Util.o
 ppmtorgb : ppmtorgb.o Utils/Util.o TP1/TP1_funcs.o
 ppmtopgm : ppmtopgm.o Utils/Util.o TP1/TP1_funcs.o
 ppmtopam : ppmtopam.o Utils/Util.o TP1/TP1_funcs.o
+
+createmask : Utils/Util.o TP1/TP1_funcs.o
 
 clean :
 	@rm -f *.o Utils/*.o TP1/*.o $(PROG)
