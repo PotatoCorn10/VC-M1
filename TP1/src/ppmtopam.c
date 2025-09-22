@@ -17,11 +17,6 @@ int main(int argc, char* argv[]) {
       exit(0);
     }
 
-    // if(argc == 4) {
-    //   // convert char * to float
-    //   brightness = atof(argv[3]);
-    // }
-
     /* Opening input file */
     image = read_ppm(argv[1]);
 
