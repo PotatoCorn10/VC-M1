@@ -181,12 +181,122 @@ void write_pgm(pgm_file image, char *filename) {
 
 
 ppm_file read_ppm(char *filename) {
-    ppm_file image;
-    pm_error("PLEASE IMPLEMENT");
-    image.cols = 0;
-    return image;
+        
+  FILE *ifp;
+  int firstchar, rows, cols;
+
+  int is_raw;
+
+  int i, j;
+  ppm_file image;
+
+  /* Opening input file */
+  ifp = fopen(filename, "r");
+  if (ifp == NULL) {
+    printf("error in opening file %s\n", filename);
+    exit(1);
+  }
+
+  /*  Magic number reading */
+  firstchar = getc(ifp);
+  if (firstchar == EOF) {
+    pm_error("EOF / read error / magic number");
+  }
+
+  image.magic_number = getc(ifp);
+  if (image.magic_number == EOF) {
+    pm_error("EOF /read error / magic number");
+  }
+
+  if (image.magic_number != '3' && image.magic_number != '6') {
+    pm_error(" wrong file type ");
+  }
+
+  if (image.magic_number == '6'){
+     is_raw = 1;
+  } else{
+     is_raw = 0;
+  }
+
+  /* Reading image dimensions */
+  cols = pm_getint(ifp);
+  rows = pm_getint(ifp);
+  image.maxval = pm_getint(ifp);
+
+  image.rows = rows;
+  image.cols = cols;
+
+  /* Memory allocation  */
+  image.pixmap = (pixel *) malloc (cols * rows * sizeof(pixel));
+
+  /* Reading */
+
+    /* Reading */
+  for (i = 0; i < rows; i++) {
+    for (j = 0; j < cols; j++) {
+      // if is_raw = 1 => read a binary file else reads ascii file 
+      if (is_raw) {
+        // Binary
+        image.pixmap[i * cols + j].red = pm_getrawbyte(ifp);
+        image.pixmap[i * cols + j].green = pm_getrawbyte(ifp);
+        image.pixmap[i * cols + j].blue = pm_getrawbyte(ifp);
+      } else {
+        // ASCII
+        image.pixmap[i * cols + j].red = pm_getint(ifp);
+        image.pixmap[i * cols + j].green = pm_getint(ifp);
+        image.pixmap[i * cols + j].blue = pm_getint(ifp);
+      }
+    }
+  }
+  /* Closing input file */
+  fclose(ifp);
+
+  return image;
 }
 
 void write_ppm(ppm_file image, char *filename) {
-    pm_error("PLEASE IMPLEMENT");
+  FILE *ofp;
+  int is_raw, i, j;
+
+  /* Opening output file */
+  ofp = fopen(filename, "w");
+  if (ofp == NULL) {
+    printf("error in opening file %s\n", filename);
+    pm_error(" FILE OPEN ERROR");
+  }
+
+  if (image.magic_number == '3') {
+    is_raw = 0;
+  } else {
+    is_raw = 1;
+  }
+
+  if (is_raw) {
+    fprintf(ofp, "P6\n");
+  } else {
+    fprintf(ofp, "P3\n");
+  }
+
+  fprintf(ofp, "%d %d \n", image.cols, image.rows);
+  fprintf(ofp, "%d\n", image.maxval);
+
+  for (i = 0; i < image.rows; i++)
+    for (j = 0; j < image.cols; j++)
+      if (is_raw) {
+       // Binary file 
+        fprintf(ofp, "%c", image.pixmap[i * image.cols + j].red);
+        fprintf(ofp, "%c", image.pixmap[i * image.cols + j].green);
+        fprintf(ofp, "%c", image.pixmap[i * image.cols + j].blue);
+      }
+      else {
+      // ASCII file 
+        fprintf(ofp, "%d ", image.pixmap[i * image.cols + j].red);
+        fprintf(ofp, "%d ", image.pixmap[i * image.cols + j].green);
+        fprintf(ofp, "%d ", image.pixmap[i * image.cols + j].blue);
+      }
+
+  /* Closing output file */
+  fclose(ofp);
 }
+
+

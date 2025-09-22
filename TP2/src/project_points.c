@@ -63,47 +63,68 @@ int main(int argc, char *argv[])
 
     // allocate output image and initialize with white colors
     ppm_file image;
-    image.rows = height;
-    image.cols = width;
+    image.rows = height * alpha_v;
+    image.cols = width * alpha_u;
     image.maxval = 255;
     image.magic_number = '6';
 
     // Allocate what you think you need
 
+    image.pixmap = (pixel*)malloc(sizeof(pixel)*image.rows *image.cols);
+    float* distances = (float*)malloc(sizeof(float)*image.rows * image.cols);
+    for(int i = 0; i < image.rows*image.cols; ++i){
+      distances[i] = 100000;
+    }
 
     // Print if depth buffer is being used
     if (use_depth) {
         printf("Using Depth Buffer\n");
     }
 
-    int orthogonal = 0
+    int orthogonal = 0;
     if (f==0) {
         printf("Using Orthogonal camera\n");
-        orthogonal = 1
+        orthogonal = 1;
     }
-
-    printf("PLEASE IMPLEMENT THE PROJECTION\n");
 
     // Go through the point-cloud
     for (int i = 0; i < N_v; i++) {
+
+        float x_cam;
+        float y_cam;
 
         // Project the point
         if (orthogonal) {
             // implement orthogonal projection here
 
+            x_cam = points[i].x * f / points[i].z;
+            y_cam = points[i].y * f / points[i].z;
+
+
         } else {
             // implement pinhole projection here
+
+            x_cam = points[i].x/((1 + points[i].z)/f);
+            y_cam = points[i].y/((1 + points[i].z)/f);
 
         }
 
         // Check if the point is inside the image
+        if(x_cam <= u_0 - width/2 || x_cam >= u_0 + width/2 || y_cam <= v_0 - height/2 || y_cam >= v_0 + height/2) break;
+        
 
+        int u_cam = (int) x_cam / (alpha_u + u_0);
+        int v_cam = (int) y_cam / (alpha_v + v_0);
 
         // Do something about the depth
 
+        if(points[i].z >= distances[v_cam * image.cols + u_cam]) break;
 
         // If ok, update the image pixel color
 
+        image.pixmap[v_cam * image.cols + u_cam].red = points[i].r;
+        image.pixmap[v_cam * image.cols + u_cam].blue = points[i].b;
+        image.pixmap[v_cam * image.cols + u_cam].green = points[i].g;
     }
 
     // Save the image
