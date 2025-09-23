@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <float.h>
 #include <math.h>
 
 #include "Utils/imageFormationUtils.h"
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
     // allocate output image and initialize with white colors
     ppm_file image;
-    image.rows = height * alpha_v;
-    image.cols = width * alpha_u;
+    image.rows = height;
+    image.cols = width;
     image.maxval = 255;
     image.magic_number = '6';
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     image.pixmap = (pixel*)malloc(sizeof(pixel)*image.rows *image.cols);
     float* distances = (float*)malloc(sizeof(float)*image.rows * image.cols);
     for(int i = 0; i < image.rows*image.cols; ++i){
-      distances[i] = 100000;
+      distances[i] = FLT_MAX; // initialising distance array to big values 
     }
 
     // Print if depth buffer is being used
@@ -100,25 +100,27 @@ int main(int argc, char *argv[])
             x_cam = points[i].x * f / points[i].z;
             y_cam = points[i].y * f / points[i].z;
 
-
         } else {
             // implement pinhole projection here
 
-            x_cam = points[i].x/((1 + points[i].z)/f);
-            y_cam = points[i].y/((1 + points[i].z)/f);
+            x_cam = (points[i].x * f) / (points[i].z + f);
+            y_cam = (points[i].y * f) / (points[i].z + f);
 
         }
 
-        // Check if the point is inside the image
-        if(x_cam <= u_0 - width/2 || x_cam >= u_0 + width/2 || y_cam <= v_0 - height/2 || y_cam >= v_0 + height/2) break;
-        
+        int u_cam = (int)(x_cam / alpha_u + u_0);
+        int v_cam = (int)(y_cam / alpha_v + v_0);
 
-        int u_cam = (int) x_cam / (alpha_u + u_0);
-        int v_cam = (int) y_cam / (alpha_v + v_0);
+        // Check if the point is inside the image
+        if (u_cam < 0 || u_cam >= image.cols || v_cam < 0 || v_cam >= image.rows)
+        continue;
 
         // Do something about the depth
+        if (use_depth && points[i].z >= distances[v_cam * image.cols + u_cam])
+        continue;
 
-        if(points[i].z >= distances[v_cam * image.cols + u_cam]) break;
+        // allow us to only take into account the points closest to the camera in case of overlapping points that are further away 
+        distances[v_cam * image.cols + u_cam] = points[i].z; 
 
         // If ok, update the image pixel color
 
