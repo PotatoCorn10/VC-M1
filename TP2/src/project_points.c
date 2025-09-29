@@ -60,7 +60,12 @@ int main(int argc, char *argv[])
 
     // and center it
     centerThePCL(points, N_v);
+    float *result = malloc(sizeof(float)*16);
+    computeTrans(gama,beta, alpha, T_x, T_y, T_z, result);
 
+    for (int i = 0; i<16; i++){
+        printf("%f ", result[i]);
+    }
     // allocate output image and initialize with white colors
     ppm_file image;
     image.rows = height;
@@ -89,6 +94,16 @@ int main(int argc, char *argv[])
 
     // Go through the point-cloud
     for (int i = 0; i < N_v; i++) {
+
+        struct point3d p;
+
+        p.x = points[i].x*result[0] + points[i].y*result[1] + points[i].z*result[2] + result[3];
+        p.y = points[i].x*result[4] + points[i].y*result[5] + points[i].z*result[6] + result[7];
+        p.z = points[i].x*result[8] + points[i].y*result[9] + points[i].z*result[10] + result[11];
+
+        points[i].x = p.x;
+        points[i].y = p.y;
+        points[i].z = p.z;
 
         float x_cam;
         float y_cam;
