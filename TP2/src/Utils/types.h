@@ -31,4 +31,21 @@ typedef struct {
   int maxval;
 } ppm_file;
 
+typedef struct {
+  bit red;
+  bit green;
+  bit blue;
+  bit alpha;
+} pam_pixel;
+
+typedef struct {
+  pam_pixel *pammap;
+  char magic_number;
+  int rows;
+  int cols;
+  int maxval;
+  int depth;
+  // char tupltype[64];
+} pam_file;
+
 #endif

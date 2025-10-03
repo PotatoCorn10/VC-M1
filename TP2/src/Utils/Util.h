@@ -26,4 +26,6 @@ void write_pgm(pgm_file image, char *filename);
 ppm_file read_ppm(char *filename);
 void write_ppm(ppm_file image, char *filename);
 
+void write_pam(pam_file image, char *filename);
+
 #endif

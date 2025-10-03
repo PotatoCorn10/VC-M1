@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     // The output filename is generated from the input
     char output_filename[512];
-    sprintf(output_filename, "results/%c_%.0f_%d_%d_%.1f_%.1f_%.2f_%.2f_%.1f_%.1f_%.1f_%.1f_%.1f_%.1f_%d.ppm",
+    sprintf(output_filename, "results/%c_%.0f_%d_%d_%.1f_%.1f_%.2f_%.2f_%.1f_%.1f_%.1f_%.1f_%.1f_%.1f_%d.pam",
             off_filename[7], // hack: use first letter of model to create output (f or h in this TP)
             f, width, height, u_0, v_0, alpha_u, alpha_v,
             gama, beta, alpha, T_x, T_y, T_z,
@@ -67,18 +67,25 @@ int main(int argc, char *argv[])
         printf("%f ", result[i]);
     }
     // allocate output image and initialize with white colors
-    ppm_file image;
-    image.rows = height;
-    image.cols = width;
-    image.maxval = 255;
-    image.magic_number = '6';
+    pam_file pam_image;
+    pam_image.rows = height;
+    pam_image.cols = width;
+    pam_image.maxval = 255;
+    pam_image.magic_number = '7';
+    pam_image.depth = 4;
+    
 
     // Allocate what you think you need
 
-    image.pixmap = (pixel*)malloc(sizeof(pixel)*image.rows *image.cols);
-    float* distances = (float*)malloc(sizeof(float)*image.rows * image.cols);
-    for(int i = 0; i < image.rows*image.cols; ++i){
+    pam_image.pammap = (pam_pixel*)malloc(sizeof(pam_pixel)*pam_image.rows *pam_image.cols);
+
+    float* distances = (float*)malloc(sizeof(float)*pam_image.rows * pam_image.cols);
+    for(int i = 0; i < pam_image.rows*pam_image.cols; ++i){
       distances[i] = FLT_MAX; // initialising distance array to big values 
+    }
+
+    for(int i = 0; i < pam_image.rows*pam_image.cols; ++i){
+      pam_image.pammap[i].alpha = 0;
     }
 
     // Print if depth buffer is being used
@@ -127,24 +134,25 @@ int main(int argc, char *argv[])
         int v_cam = (int)(y_cam / alpha_v + v_0);
 
         // Check if the point is inside the image
-        if (u_cam < 0 || u_cam >= image.cols || v_cam < 0 || v_cam >= image.rows)
+        if (u_cam < 0 || u_cam >= pam_image.cols || v_cam < 0 || v_cam >= pam_image.rows)
         continue;
 
         // Do something about the depth
-        if (use_depth && points[i].z >= distances[v_cam * image.cols + u_cam])
+        if (use_depth && points[i].z >= distances[v_cam * pam_image.cols + u_cam])
         continue;
 
         // allow us to only take into account the points closest to the camera in case of overlapping points that are further away 
-        distances[v_cam * image.cols + u_cam] = points[i].z; 
+        distances[v_cam * pam_image.cols + u_cam] = points[i].z; 
 
         // If ok, update the image pixel color
 
-        image.pixmap[v_cam * image.cols + u_cam].red = points[i].r;
-        image.pixmap[v_cam * image.cols + u_cam].blue = points[i].b;
-        image.pixmap[v_cam * image.cols + u_cam].green = points[i].g;
+        pam_image.pammap[v_cam * pam_image.cols + u_cam].red = points[i].r;
+        pam_image.pammap[v_cam * pam_image.cols + u_cam].blue = points[i].b;
+        pam_image.pammap[v_cam * pam_image.cols + u_cam].green = points[i].g;
+        pam_image.pammap[v_cam * pam_image.cols + u_cam].alpha = 255;
     }
 
     // Save the image
     printf("Writting output file %s", output_filename);
-    write_ppm(image, output_filename);
+    write_pam(pam_image, output_filename);
 }

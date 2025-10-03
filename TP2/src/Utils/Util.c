@@ -300,3 +300,32 @@ void write_ppm(ppm_file image, char *filename) {
 }
 
 
+void write_pam(pam_file image, char *filename) {
+  FILE *ofp;
+
+  /* Opening output file */
+  ofp = fopen(filename, "w");
+  if (ofp == NULL) {
+    printf("error in opening file %s\n", filename);
+    pm_error(" FILE OPEN ERROR");
+  }
+
+  fprintf(ofp, "P7\n");
+  fprintf(ofp, "WIDTH %d\nHEIGHT %d \n", image.cols, image.rows);
+  fprintf(ofp, "DEPTH %d\n", image.depth);
+  fprintf(ofp, "MAXVAL %d\n", image.maxval);
+  fprintf(ofp, "TUPLTYPE RGB_ALPHA\n");
+  fprintf(ofp, "ENDHDR\n");
+
+
+  for (int i = 0; i < image.rows; i++){
+    for (int j = 0; j < image.cols; j++) {
+        fprintf(ofp, "%c", image.pammap[i * image.cols + j].red);
+        fprintf(ofp, "%c", image.pammap[i * image.cols + j].green);
+        fprintf(ofp, "%c", image.pammap[i * image.cols + j].blue);
+        fprintf(ofp, "%c", image.pammap[i * image.cols + j].alpha);
+    }
+  }
+  /* Closing output file */
+  fclose(ofp);
+}
