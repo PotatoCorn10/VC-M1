@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
         if (orthogonal) {
             // implement orthogonal projection here
 
-            x_cam = points[i].x * f / points[i].z;
-            y_cam = points[i].y * f / points[i].z;
+            x_cam = points[i].x;
+            y_cam = points[i].y;
 
         } else {
             // implement pinhole projection here
