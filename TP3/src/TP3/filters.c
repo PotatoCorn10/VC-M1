@@ -61,35 +61,37 @@ pgm_file binomial_filter(pgm_file image, int filter_size, int iterations) {
 
     // depending on filter size, need to add padding to the image 
     int padding_size = filter_size / 2;
-    pgm_file padding_img; padding_img.cols = image.cols + 2*padding_size; padding_img.rows = image.rows + 2*padding_size;
-    padding_img.graymap = (gray*)malloc(sizeof(gray) * padding_img.rows * padding_img.cols);
+    for(int iter = 0; iter < iterations; ++iter){
+      pgm_file padding_img; padding_img.cols = image.cols + 2*padding_size; padding_img.rows = image.rows + 2*padding_size;
+      padding_img.graymap = (gray*)malloc(sizeof(gray) * padding_img.rows * padding_img.cols);
 
-    for (int i = 0; i < padding_img.rows; i++){
-      for(int j = 0; j < padding_img.cols; j++){
-        if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
-          padding_img.graymap[i * padding_img.cols + j] = 0;
-        } else {
-          padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + (j - padding_size)];
+      for (int i = 0; i < padding_img.rows; i++){
+        for(int j = 0; j < padding_img.cols; j++){
+          if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
+            padding_img.graymap[i * padding_img.cols + j] = 0;
+          } else {
+            padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + (j - padding_size)];
+          }
         }
       }
-    }
 
 
 
 
-    
-    for (int i = 0; i < image.rows; i++){
-        for (int j = 0; j < image.cols; j++) {
+      
+      for (int i = 0; i < image.rows; i++){
+          for (int j = 0; j < image.cols; j++) {
 
-            // Apply filter
-            int val = 0;
-            for(int h = 0; h < filter_size; h++){
-              for(int k = 0; k < filter_size; k++){
-                val += padding_img.graymap[(i+h) * padding_img.cols + (j+k)] * filter[h][k];
+              // Apply filter
+              int val = 0;
+              for(int h = 0; h < filter_size; h++){
+                for(int k = 0; k < filter_size; k++){
+                  val += padding_img.graymap[(i+h) * padding_img.cols + (j+k)] * filter[h][k];
+                }
               }
-            }
-            image.graymap[i * image.cols + j] = val;
-        }
+              image.graymap[i * image.cols + j] = val;
+          }
+      }
     }
     output_image = image;
 
