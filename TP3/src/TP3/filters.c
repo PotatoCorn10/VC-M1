@@ -1,6 +1,7 @@
 #include "filters.h"
 #include "../Utils/Util.h"
 #include <stdlib.h>
+#include <math.h>
 
 // outputs filter 
 // Function to compute binomial coefficient C(n, k)
@@ -101,13 +102,14 @@ pgm_file binomial_filter(pgm_file image, int filter_size, int iterations) {
           for (int j = 0; j < image.cols; j++) {
 
               // Apply filter
-              int val = 0;
+              double val = 0;
               for(int h = 0; h < filter_size; h++){
                 for(int k = 0; k < filter_size; k++){
-                  val += padding_img.graymap[(i+h) * padding_img.cols + (j+k)] * filter[h][k];
+                  val += ((double)padding_img.graymap[(i+h) * padding_img.cols + (j+k)]) * filter[h][k];
                 }
               }
-              image.graymap[i * image.cols + j] = val;
+              image.graymap[i * image.cols + j] = val - ((double)((int)val)) >= 0.5 ?
+                                                  ((int)val) + 1 : (int)val;
           }
       }
     }
