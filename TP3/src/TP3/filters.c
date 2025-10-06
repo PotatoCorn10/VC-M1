@@ -51,6 +51,24 @@ double** b_filter(int size) {
     return kernel;
 }
 
+pgm_file add_padding(pgm_file image, int filter_size){
+  pgm_file padding_img;
+  int padding_size = filter_size / 2;
+
+  padding_img.cols = image.cols + 2*padding_size; padding_img.rows = image.rows + 2*padding_size;
+  padding_img.graymap = (gray*)malloc(sizeof(gray) * padding_img.rows * padding_img.cols);
+
+  for (int i = 0; i < padding_img.rows; i++){
+    for(int j = 0; j < padding_img.cols; j++){
+      if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
+        padding_img.graymap[i * padding_img.cols + j] = 0;
+      } else {
+        padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + (j - padding_size)];
+      }
+    }
+  }
+  return padding_img;
+}
 
 // apply binomial filter to image
 // iteration = number of time we apply the filter
@@ -60,25 +78,9 @@ pgm_file binomial_filter(pgm_file image, int filter_size, int iterations) {
     double ** filter = b_filter(filter_size);
 
     // depending on filter size, need to add padding to the image 
-    int padding_size = filter_size / 2;
     for(int iter = 0; iter < iterations; ++iter){
-      pgm_file padding_img; padding_img.cols = image.cols + 2*padding_size; padding_img.rows = image.rows + 2*padding_size;
-      padding_img.graymap = (gray*)malloc(sizeof(gray) * padding_img.rows * padding_img.cols);
+      pgm_file padding_img = add_padding(image, filter_size);
 
-      for (int i = 0; i < padding_img.rows; i++){
-        for(int j = 0; j < padding_img.cols; j++){
-          if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
-            padding_img.graymap[i * padding_img.cols + j] = 0;
-          } else {
-            padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + (j - padding_size)];
-          }
-        }
-      }
-
-
-
-
-      
       for (int i = 0; i < image.rows; i++){
           for (int j = 0; j < image.cols; j++) {
 
@@ -98,11 +100,40 @@ pgm_file binomial_filter(pgm_file image, int filter_size, int iterations) {
     return output_image;
 }
 
+int compare (const void * a, const void * b)
+{
+  return ( *(int*)a - *(int*)b );
+}
+
+int median(int input[], int len){
+  qsort(input, len, sizeof(int), compare);
+  return input[len/2];
+}
+
 // apply median filter to image
 pgm_file median_filter(pgm_file image, int filter_size, int iterations) {
     pgm_file output_image;
 
-    printf("PLEASE IMPLEMENT median_filter\n");
+    int val_arr[filter_size*filter_size];
+
+    // depending on filter size, need to add padding to the image 
+    for(int iter = 0; iter < iterations; ++iter){
+      pgm_file padding_img = add_padding(image, filter_size);
+
+      for (int i = 0; i < image.rows; i++){
+          for (int j = 0; j < image.cols; j++) {
+
+              // Apply filter
+              for(int h = 0; h < filter_size; h++){
+                for(int k = 0; k < filter_size; k++){
+                  // compute median
+                  val_arr[h * filter_size + k] = padding_img.graymap[(i+h) * padding_img.cols + (j+k)];
+                }
+              }
+              image.graymap[i * image.cols + j] = median(val_arr, filter_size*filter_size);
+          }
+      }
+    }
     output_image = image;
 
     return output_image;
