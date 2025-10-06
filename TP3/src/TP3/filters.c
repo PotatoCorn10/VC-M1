@@ -2,9 +2,52 @@
 #include "../Utils/Util.h"
 
 // outputs filter 
-double **b_filter(int filter_size){
-    double ** filter = (double**) malloc (sizeof(double*)*filter_size);
-    return filter;
+// Function to compute binomial coefficient C(n, k)
+unsigned long binomial_coeff(int n, int k) {
+    if (k < 0 || k > n) return 0;
+    if (k == 0 || k == n) return 1;
+
+    unsigned long res = 1;
+    for (int i = 1; i <= k; i++) {
+        res = res * (n - i + 1) / i;
+    }
+    return res;
+}
+
+// Function to generate a binomial filter matrix of given size
+double** binomial_filter(int size) {
+    if (size < 1) return NULL;
+
+    // Allocate 2D array for the kernel
+    double **kernel = malloc(size * sizeof(double*));
+    for (int i = 0; i < size; i++) {
+        kernel[i] = malloc(size * sizeof(double));
+    }
+
+    // Generate 1D binomial coefficients (Pascal row)
+    double *coeffs = malloc(size * sizeof(double));
+    for (int i = 0; i < size; i++) {
+        coeffs[i] = (double)binomial_coeff(size - 1, i);
+    }
+
+    // Compute the outer product to get the 2D filter
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            kernel[i][j] = coeffs[i] * coeffs[j];
+            sum += kernel[i][j];
+        }
+    }
+
+    // Normalize so the total sum = 1
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            kernel[i][j] /= sum;
+        }
+    }
+
+    free(coeffs);
+    return kernel;
 }
 
 
