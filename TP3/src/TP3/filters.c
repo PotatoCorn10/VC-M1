@@ -15,7 +15,7 @@ unsigned long binomial_coeff(int n, int k) {
 }
 
 // Function to generate a binomial filter matrix of given size
-double** binomial_filter(int size) {
+double** b_filter(int size) {
     if (size < 1) return NULL;
 
     // Allocate 2D array for the kernel
@@ -59,7 +59,21 @@ pgm_file binomial_filter(pgm_file image, int filter_size, int iterations) {
     double ** filter = b_filter(filter_size);
 
     // depending on filter size, need to add padding to the image 
-    pgm_file padding_img = malloc()
+    int padding_size = filter_size / 2;
+    pgm_file padding_img; padding_img.cols = image.cols + 2*padding_size; padding_img.rows = image.rows + 2*padding_size;
+    padding_img.graymap = (gray*)malloc(sizeof(gray) * padding_img.rows * padding_img.cols);
+
+    for (int i = 0; i < padding_img.rows; i++){
+      for(int j = 0; j < padding_img.cols; j++){
+        if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
+          padding_img.graymap[i * padding_img.cols + j] = 0;
+        } else {
+          padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * padding_img.cols + (j - padding_size)];
+        }
+      }
+    }
+
+    
     for (int i = 0; i < image.rows; i++){
         for (int j = 0; j < image.cols; j++) {
 
