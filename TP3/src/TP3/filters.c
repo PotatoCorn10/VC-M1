@@ -61,7 +61,23 @@ pgm_file add_padding(pgm_file image, int filter_size){
   for (int i = 0; i < padding_img.rows; i++){
     for(int j = 0; j < padding_img.cols; j++){
       if(i < padding_size || i >= padding_img.rows - padding_size || j < padding_size || j >= padding_img.cols - padding_size){
-        padding_img.graymap[i * padding_img.cols + j] = 0;
+        
+        if((i < padding_size || i >= padding_img.rows - padding_size)&&(j < padding_size || j >= padding_img.cols - padding_size)){
+          // corner
+          padding_img.graymap[i * padding_img.cols + j] = 0;
+        } else if(i < padding_size){
+          // top padding
+          padding_img.graymap[i * padding_img.cols + j] = image.graymap[j - padding_size];
+        } else if(i >= padding_img.rows - padding_size){
+          // bottom padding
+          padding_img.graymap[i * padding_img.cols + j] = image.graymap[(image.rows-1)*image.cols + j - padding_size];
+        } else if(j < padding_size){
+          // left padding
+          padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols];
+        } else if(j >= padding_img.cols - padding_size){
+          // right padding
+          padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + image.cols - 1];
+        }
       } else {
         padding_img.graymap[i * padding_img.cols + j] = image.graymap[(i - padding_size) * image.cols + (j - padding_size)];
       }
