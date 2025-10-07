@@ -48,7 +48,17 @@ pgm_file histogram_stretching(pgm_file image) {
 
 pgm_file histogram_equalization(pgm_file image) {
 
-    printf("PLEASE IMPLEMENT histogram_equalization\n");
+    histogram_t hist = compute_histogram(image);
+
+
+    for(int i = 0; i < image.rows*image.cols; ++i){
+      double factor = ((double)image.maxval)/(double)(image.rows*image.cols);
+      double sum = 0;
+      for(int j = 0; j < image.graymap[i]; ++j){
+        sum += (double)hist.histogram[j];
+      }
+      image.graymap[i] = ((int)(factor * sum));
+    }
 
     pgm_file output_image;
 
