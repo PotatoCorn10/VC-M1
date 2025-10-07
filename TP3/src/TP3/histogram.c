@@ -26,7 +26,18 @@ histogram_t compute_histogram(pgm_file image) {
 
 pgm_file histogram_stretching(pgm_file image) {
 
-    printf("PLEASE IMPLEMENT histogram_stretching\n");
+    double minval = 255.0;
+    double maxval = 0.0;
+
+    // find image max and min values
+    for(int i = 0; i < image.rows*image.cols; ++i){
+      if(((double)image.graymap[i]) < minval) minval = (double)image.graymap[i];
+      if(((double)image.graymap[i]) > maxval) maxval = (double)image.graymap[i];
+    }
+
+    for(int i = 0; i < image.rows*image.cols; ++i){
+      image.graymap[i] = (int)(((((double)image.graymap[i]) - minval)/(maxval - minval))*(double)image.maxval);
+    }
 
     pgm_file output_image;
 
