@@ -7,10 +7,17 @@
 
 histogram_t compute_histogram(pgm_file image) {
 
-    printf("PLEASE IMPLEMENT compute_histogram\n");
-
     histogram_t histogram;
-    histogram.size = 0;
+    histogram.size = image.maxval + 1;
+    histogram.histogram = (int*)malloc(histogram.size*sizeof(int));
+
+    for(int i = 0; i < histogram.size; ++i){
+      histogram.histogram[i] = 0;
+    }
+    
+    for(int i = 0; i < image.rows*image.rows; ++i){
+      ++histogram.histogram[(int)image.graymap[i]];
+    }
 
     return histogram;
 
