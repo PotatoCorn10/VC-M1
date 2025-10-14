@@ -299,3 +299,44 @@ void write_ppm(ppm_file image, char *filename) {
   /* Closing output file */
   fclose(ofp);
 }
+
+void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness){
+    // Initializes all 3 images to have same type a size as init img 
+    if (image.magic_number != '3' || image.magic_number != '6'){
+        // perror("WRONG FILE TYPE");
+    }
+    if (image.magic_number == '3')
+    {
+        // ASCII file 
+        image_gray->magic_number = '2';
+    } else {
+        // Binary file 
+        image_gray->magic_number  = '5';
+    }
+    
+    image_gray->cols = image.cols;
+    image_gray->rows = image.rows;
+    image_gray->maxval = image.maxval;
+
+    image_gray->graymap = (gray *) malloc (image.cols * image.rows * sizeof(gray));
+    assert(image_gray->graymap);
+
+    for (int i = 0; i < image.rows; i++){
+        for (int j = 0; j < image.cols; j++) {
+
+            // converting rgb to grayscale 
+            int idx = i * image.cols + j;
+            int r = image.pixmap[idx].red;
+            int g = image.pixmap[idx].green;
+            int b = image.pixmap[idx].blue;
+
+            float gray_value = (0.2126f * r + 0.7152f * g + 0.0722f * b) * brightness;
+
+            // Clamp to [0, maxval]
+            // if (gray_value < 0) gray_value = 0;
+            // if (gray_value > image.maxval) gray_value = image.maxval;
+
+            image_gray->graymap[idx] = (gray) gray_value;
+        }
+    }
+}

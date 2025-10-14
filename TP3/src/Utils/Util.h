@@ -26,4 +26,6 @@ void write_pgm(pgm_file image, char *filename);
 ppm_file read_ppm(char *filename);
 void write_ppm(ppm_file image, char *filename);
 
+void rgb_to_gray(ppm_file image, pgm_file *image_gray, float brightness);
+
 #endif
