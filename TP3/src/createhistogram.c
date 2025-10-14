@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "Utils/types.h"
 #include "Utils/Util.h"

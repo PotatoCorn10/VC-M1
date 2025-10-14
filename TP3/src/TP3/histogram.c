@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "../Utils/types.h"
+#include "../Utils/Util.h"
 
 
 histogram_t compute_histogram(pgm_file image) {
@@ -21,6 +22,17 @@ histogram_t compute_histogram(pgm_file image) {
 
     return histogram;
 
+}
+
+histogram_t compute_histogram_ppm(ppm_file image) {
+
+  pgm_file image_gray;
+
+  rgb_to_gray(image, &image_gray, 1);
+
+  histogram_t histogram = compute_histogram(image_gray);
+    
+  return histogram;
 }
 
 
@@ -46,6 +58,44 @@ pgm_file histogram_stretching(pgm_file image) {
     return output_image;
 }
 
+ppm_file histogram_stretching_ppm(ppm_file image) {
+
+  pgm_file image_gray;
+  pgm_file image_gray_stretched;
+
+  rgb_to_gray(image, &image_gray, 1);
+  rgb_to_gray(image, &image_gray_stretched, 1);
+
+  image_gray_stretched = histogram_stretching(image_gray_stretched);
+
+  for(int i = 0; i < image.rows*image.cols; ++i){
+    double old_val =(double)image_gray.graymap[i];
+    double new_val =(double)image_gray_stretched.graymap[i];
+    double factor;
+    if(old_val == 0) {
+      factor = 0;
+    } else{
+      factor = new_val/old_val;
+    }
+    int r = (int)(((double)image.pixmap[i].red) * factor);
+    int g = (int)(((double)image.pixmap[i].green) * factor);
+    int b =  (int)(((double)image.pixmap[i].blue) * factor);
+    if(r > image.maxval) r = image.maxval;
+    if(g > image.maxval) g = image.maxval;
+    if(b > image.maxval) b = image.maxval;
+
+    image.pixmap[i].red = r;
+    image.pixmap[i].green = g;
+    image.pixmap[i].blue = b;
+  }
+
+  ppm_file output_image;
+
+  output_image = image;
+
+  return output_image;
+}
+
 pgm_file histogram_equalization(pgm_file image) {
 
     histogram_t hist = compute_histogram(image);
@@ -65,6 +115,43 @@ pgm_file histogram_equalization(pgm_file image) {
     output_image = image;
 
     return output_image;
+}
+
+ppm_file histogram_equalization_ppm(ppm_file image){
+  pgm_file image_gray;
+  pgm_file image_gray_equalized;
+
+  rgb_to_gray(image, &image_gray, 1);
+  rgb_to_gray(image, &image_gray_equalized, 1);
+
+  image_gray_equalized = histogram_equalization(image_gray_equalized);
+
+  for(int i = 0; i < image.rows*image.cols; ++i){
+    double old_val =(double)image_gray.graymap[i];
+    double new_val =(double)image_gray_equalized.graymap[i];
+    double factor;
+    if(old_val == 0) {
+      factor = 0;
+    } else{
+      factor = new_val/old_val;
+    }
+    int r = (int)(((double)image.pixmap[i].red) * factor);
+    int g = (int)(((double)image.pixmap[i].green) * factor);
+    int b =  (int)(((double)image.pixmap[i].blue) * factor);
+    if(r > image.maxval) r = image.maxval;
+    if(g > image.maxval) g = image.maxval;
+    if(b > image.maxval) b = image.maxval;
+
+    image.pixmap[i].red = r;
+    image.pixmap[i].green = g;
+    image.pixmap[i].blue = b;
+  }
+
+  ppm_file output_image;
+
+  output_image = image;
+
+  return output_image;
 }
 
 
