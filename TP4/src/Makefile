@@ -10,10 +10,10 @@ all : $(PROG)
 CC        =  gcc
 CFLAGS    =  -g -Wall
 CPPFLAGS  =  -DDEBUG
-LDFLAGS   =  -g -lm
+LDFLAGS   =  -g 
 
-displayGradientMagnitudes : displayGradientMagnitudes.o Utils/Util.o Utils/filters.o TP4/gradients.o
-cannyEdges: cannyEdges.o Utils/Util.o Utils/filters.o TP4/gradients.o TP4/canny.o
+displayGradientMagnitudes : displayGradientMagnitudes.o Utils/Util.o Utils/filters.o TP4/gradients.o -lm
+cannyEdges: cannyEdges.o Utils/Util.o Utils/filters.o TP4/gradients.o TP4/canny.o -lm
 
 
 clean :
