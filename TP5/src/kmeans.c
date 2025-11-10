@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     int K = atoi(argv[3]);
     int init = atoi(argv[4]);
     int stop = atoi(argv[5]);
-    int location = atoi(argv[6]);
+    double location = strtod(argv[6],NULL);
     int seed_value = atoi(argv[7]);
 
     // Initializing random seed
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     char output_filename[512];
 
     if (atoi(argv[2]) == -1) {
-        sprintf(output_filename, "results/%c_%d_%d_%d_%d_%d.ppm",
+        sprintf(output_filename, "results/%c_%d_%d_%d_%f_%d.ppm",
             argv[1][7], // hack: use first letter of image to create output (f for frog in this TP)
             K, init, stop, location, seed_value);
 

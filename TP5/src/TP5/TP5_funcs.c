@@ -8,23 +8,24 @@
 
 #define MAX_ITER 100 // maximum number of iterations
 
-// Helper function: compute squared Euclidean distance
-static double dist2(double *a, double *b, int dim) {
+// compute squared Euclidean distance
+static double dist2(double *a, double *b, int dim, double location) {
     double d = 0.0;
     for (int i = 0; i < dim; i++)
-        d += (a[i] - b[i]) * (a[i] - b[i]);
+        if(i < 3) d += (a[i] - b[i]) * (a[i] - b[i]);
+        else d += location * (a[i] - b[i]) * (a[i] - b[i]);
     return d;
 }
 
-// Helper: compute mean for a given cluster
-static void compute_mean(double *mean, double **points, int *assignments,
+// compute mean for a given cluster
+static void compute_mean(double *mean, double **points, int *closest_cluster,
                          int cluster_id, int N, int dim) {
     int count = 0;
     for (int d = 0; d < dim; d++)
         mean[d] = 0.0;
 
     for (int i = 0; i < N; i++) {
-        if (assignments[i] == cluster_id) {
+        if (closest_cluster[i] == cluster_id) {
             for (int d = 0; d < dim; d++)
                 mean[d] += points[i][d];
             count++;
@@ -37,12 +38,10 @@ static void compute_mean(double *mean, double **points, int *assignments,
     }
 }
 
-ppm_file kmeans(ppm_file image, int K, int init, int stop, int location) {
+ppm_file kmeans(ppm_file image, int K, int init, int stop, double location) {
     ppm_file output_image = image; // copy metadata
 
-    int width = image.cols;
-    int height = image.rows;
-    int N = width * height;
+    int N = image.cols * image.rows;
     int dim = (location == 0) ? 3 : 5; // RGB or RGB + XY
 
     // Allocate feature vectors
@@ -51,9 +50,9 @@ ppm_file kmeans(ppm_file image, int K, int init, int stop, int location) {
         points[i] = malloc(dim * sizeof(double));
 
     // Fill feature vectors
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            int idx = y * width + x;
+    for (int y = 0; y < image.rows; y++) {
+        for (int x = 0; x < image.cols; x++) {
+            int idx = y * image.cols + x;
             points[idx][0] = image.pixmap[idx].red;
             points[idx][1] = image.pixmap[idx].green;
             points[idx][2] = image.pixmap[idx].blue;
@@ -69,43 +68,48 @@ ppm_file kmeans(ppm_file image, int K, int init, int stop, int location) {
     for (int k = 0; k < K; k++) {
         centers[k] = malloc(dim * sizeof(double));
         int rand_idx = rand() % N;
-        memcpy(centers[k], points[rand_idx], dim * sizeof(double));
+        centers[k][0] = points[rand_idx][0];
+        centers[k][1] = points[rand_idx][1];
+        centers[k][2] = points[rand_idx][2];
+        if(dim == 5){
+          centers[k][3] = points[rand_idx][3];
+          centers[k][4] = points[rand_idx][4];
+        }
     }
 
-    int *assignments = malloc(N * sizeof(int));
+    int *closest_cluster = malloc(N * sizeof(int));
     for (int i = 0; i < N; i++)
-        assignments[i] = -1;
+        closest_cluster[i] = -1;
 
     double prev_error = DBL_MAX;
     int iter = 0;
 
     while (iter < MAX_ITER) {
         iter++;
-
-        // Step 1: Assign each pixel to nearest center
+        // Assign each pixel to nearest center
         for (int i = 0; i < N; i++) {
             double best_dist = DBL_MAX;
             int best_k = 0;
             for (int k = 0; k < K; k++) {
-                double d = dist2(points[i], centers[k], dim);
+                double d = dist2(points[i], centers[k], dim, location);
                 if (d < best_dist) {
                     best_dist = d;
                     best_k = k;
                 }
             }
-            assignments[i] = best_k;
+            closest_cluster[i] = best_k;
         }
 
-        // Step 2: Recompute cluster means
+        // Recompute cluster means
         for (int k = 0; k < K; k++)
-            compute_mean(centers[k], points, assignments, k, N, dim);
+            compute_mean(centers[k], points, closest_cluster, k, N, dim);
 
-        // Step 3: Compute total error
+        // Compute total error
         double total_error = 0.0;
         for (int i = 0; i < N; i++)
-            total_error += dist2(points[i], centers[assignments[i]], dim);
+            total_error += dist2(points[i], centers[closest_cluster[i]], dim, location);
 
-        // Step 4: Stop if converged (if stop == 1)
+        // Stop if converged (if stop == 1)
         if (stop == 1 && fabs(prev_error - total_error) < 1e-3) {
             printf("Converged after %d iterations.\n", iter);
             break;
@@ -116,21 +120,11 @@ ppm_file kmeans(ppm_file image, int K, int init, int stop, int location) {
 
     // Step 5: Assign pixel colors by cluster center RGB
     for (int i = 0; i < N; i++) {
-        int k = assignments[i];
+        int k = closest_cluster[i];
         output_image.pixmap[i].red   = (unsigned char)centers[k][0];
         output_image.pixmap[i].green = (unsigned char)centers[k][1];
         output_image.pixmap[i].blue  = (unsigned char)centers[k][2];
     }
-
-    // Free memory
-    for (int i = 0; i < N; i++)
-        free(points[i]);
-    free(points);
-
-    for (int k = 0; k < K; k++)
-        free(centers[k]);
-    free(centers);
-    free(assignments);
 
     return output_image;
 }
